@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0d0d15">
+    <meta name="description" content="Classic Tetris game with modern neon aesthetics. Play on desktop or mobile!">
+    <title>Neon Tetris</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Retro font for numbers/text -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <div id="game-container">
+            <!-- Left Panel: Hold & Controls -->
+            <aside class="side-panel left">
+                <div class="panel-box hold-box">
+                    <h2>HOLD</h2>
+                    <div class="canvas-wrapper">
+                        <canvas id="hold-canvas" width="80" height="80"></canvas>
+                    </div>
+                    <div class="key-hint">C</div>
+                </div>
+
+                <div class="controls-guide">
+                    <h3>CONTROLS</h3>
+                    <div class="control-row"><kbd>←</kbd> <kbd>→</kbd> <span>Move</span></div>
+                    <div class="control-row"><kbd>↑</kbd> / <kbd>X</kbd> <span>Rotate R</span></div>
+                    <div class="control-row"><kbd>Z</kbd> / <kbd>Ctrl</kbd> <span>Rotate L</span></div>
+                    <div class="control-row"><kbd>↓</kbd> <span>Soft Drop</span></div>
+                    <div class="control-row"><kbd>Space</kbd> <span>Hard Drop</span></div>
+                    <div class="control-row"><kbd>C</kbd> <span>Hold</span></div>
+                    <div class="control-row"><kbd>P</kbd> / <kbd>Esc</kbd> <span>Pause</span></div>
+                    <div class="control-row"><kbd>R</kbd> <span>Restart</span></div>
+                </div>
+            </aside>
+
+            <!-- Main Game Area -->
+            <main class="game-board-wrapper">
+                <canvas id="tetris-board" width="300" height="600"></canvas>
+
+                <!-- Overlays -->
+                <div id="start-screen" class="overlay active">
+                    <h1 class="glow-text">TETRIS</h1>
+                    <p class="blink">PRESS START</p>
+                    <button id="start-btn" class="neon-btn">START GAME</button>
+                    <div class="level-select">
+                        <label>START LEVEL: <span id="start-level-val">1</span></label>
+                        <input type="range" id="level-slider" min="1" max="15" value="1">
+                    </div>
+                </div>
+
+                <div id="pause-screen" class="overlay hidden">
+                    <h1 class="glow-text">PAUSED</h1>
+                    <button id="resume-btn" class="neon-btn">RESUME</button>
+                    <button id="quit-btn" class="neon-btn secondary">QUIT</button>
+                </div>
+
+                <div id="game-over-screen" class="overlay hidden">
+                    <h1 class="text-danger glow-text">GAME OVER</h1>
+                    <div class="final-stats">
+                        <p>SCORE: <span id="final-score">0</span></p>
+                        <p>LINES: <span id="final-lines">0</span></p>
+                    </div>
+                    <button id="restart-btn" class="neon-btn">TRY AGAIN</button>
+                </div>
+
+                <!-- Countdown Overlay -->
+                <div id="countdown" class="overlay hidden">
+                    <span id="countdown-num">3</span>
+                </div>
+            </main>
+
+            <!-- Right Panel: Next & Stats -->
+            <aside class="side-panel right">
+                <div class="panel-box next-box">
+                    <h2>NEXT</h2>
+                    <div class="canvas-wrapper">
+                        <canvas id="next-canvas" width="80" height="80"></canvas>
+                    </div>
+                </div>
+
+                <div class="stats-container">
+                    <div class="stat-group main-stats">
+                        <div class="stat-box">
+                            <h2>SCORE</h2>
+                            <p id="score">000000</p>
+                        </div>
+                        <div class="stat-box">
+                            <h2>LEVEL</h2>
+                            <p id="level">1</p>
+                        </div>
+                        <div class="stat-box">
+                            <h2>LINES</h2>
+                            <p id="lines">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-box hi-score-box">
+                        <h2>HI-SCORE</h2>
+                        <p id="high-score">000000</p>
+                    </div>
+                </div>
+
+                <div class="audio-toggle">
+                    <button id="mute-btn" class="icon-btn" aria-label="Toggle Sound">
+                        <span id="sound-icon">🔊</span>
+                    </button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Mobile Controls (Visible only on small screens) -->
+        <div id="mobile-controls" class="mobile-controls">
+            <!-- Left side: D-Pad -->
+            <div class="dpad-container">
+                <button id="btn-left" class="touch-btn dpad-btn dpad-left" aria-label="Move Left">◀</button>
+                <div class="dpad-vertical">
+                    <button id="btn-rotate" class="touch-btn dpad-btn dpad-up" aria-label="Rotate">↻</button>
+                    <button id="btn-down" class="touch-btn dpad-btn dpad-down" aria-label="Soft Drop">▼</button>
+                </div>
+                <button id="btn-right" class="touch-btn dpad-btn dpad-right" aria-label="Move Right">▶</button>
+            </div>
+
+            <!-- Center: Utility buttons -->
+            <div class="center-controls">
+                <button id="btn-hold" class="touch-btn center-btn" aria-label="Hold Piece">HOLD</button>
+                <button id="btn-pause" class="touch-btn center-btn pause-btn" aria-label="Pause">⏸︎</button>
+            </div>
+
+            <!-- Right side: Action buttons -->
+            <div class="action-container">
+                <button id="btn-drop" class="touch-btn action-btn drop-btn" aria-label="Hard Drop">⬇</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="tetrominos.js"></script>
+    <script src="audio.js"></script>
+    <script src="controls.js"></script>
+    <script src="game.js"></script>
+</body>
+
+</html>
